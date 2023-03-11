@@ -1,0 +1,46 @@
+name: Linux build
+
+on: [pull_request]
+
+jobs:
+  build-go-linux:
+    name: build-go-linux
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.19.0'
+
+      - name: Build and test
+        run: go build -a ./... && go test -a -v ./... -count=1
+
+  build-cwrapper-linux:
+    name: build-cwrapper-linux
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/bignacio/docker-images/ubuntu-cpp-22.10:1
+      credentials:
+        username: bignacio
+        password: ${{ secrets.GHCR_PACKAGES_TOKEN }}
+    strategy:
+      matrix:
+        compiler: [gcc-12, clang-15]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build and test
+      env:
+        CC: ${{matrix.compiler}}
+        CXX: clang++-15 # needed to make cmake happy
+      run: |
+        set -e
+        apt install zlib1g-dev
+        cd zwrapper
+        rm -rf build
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug
+        make -C build
+        build/zwrapper_test_direct
+        build/zwrapper_test_stream

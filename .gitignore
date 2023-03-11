@@ -1,0 +1,17 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+*.test
+
+*.out
+
+**/*.o
+zwrapper/build
+build
+.cache
+.vscode
+examples/httpclient/httpclient
+examples/httpserver/httpserver
