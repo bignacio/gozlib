@@ -407,7 +407,7 @@ func GoGZipCompressBuffer(level CompressionLevel, input []byte, output []byte) (
 	return uint64(compLen), nil
 }
 
-// GoUncompressBuffer uncompresses zipb or an input buffer writing to a pre allocated output
+// GoUncompressBuffer uncompresses a gzip or standard zlib input buffer writing to a pre allocated output
 // if the output is too small to contain the compressed data, an error is returned
 func GoUncompressBuffer(input []byte, output []byte) (uint64, error) {
 	inputCap := cap(input)
