@@ -2,6 +2,7 @@ package gozlib
 
 import (
 	"bytes"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -108,6 +109,28 @@ func TestGoCompressUncompressBuffer(t *testing.T) {
 
 	compressed := output[:compLen]
 	uncompressed := make([]byte, 0, inputSize)
+
+	uncompLen, uncompErr := GoUncompressBuffer(compressed, uncompressed)
+
+	assert.NoError(t, uncompErr)
+	assert.Equal(t, uint64(inputSize), uncompLen)
+	assert.Equal(t, input, uncompressed[:uncompLen])
+}
+
+func TestGoCompressUncompressBufferWithLenLessThanCap(t *testing.T) {
+	var i int = 1
+	input := []byte(strconv.Itoa(i))
+	// t.Logf("input: %s, len: %d, cap: %d", input, len(input), cap(input)) // input: 1, len: 1, cap: 8
+
+	inputSize := len(input)
+	outputSize := inputSize + 64
+	output := make([]byte, 0, outputSize)
+
+	compLen, compError := GoGZipCompressBuffer(CompressionLevelBestSpeed, input, output)
+	assert.NoError(t, compError)
+
+	compressed := output[:compLen]
+	uncompressed := make([]byte, 0, inputSize+64)
 
 	uncompLen, uncompErr := GoUncompressBuffer(compressed, uncompressed)
 
