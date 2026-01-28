@@ -382,14 +382,14 @@ func GoUncompressStream(inputBufferSize uint32, outputBufferSize uint32, inputRe
 // GoGZipCompressBuffer compresses data in gzip format, reading from input and
 // writing to a pre allocated output buffer. If the output is too small to contain the compressed data, an error is returned
 func GoGZipCompressBuffer(level CompressionLevel, input []byte, output []byte) (uint64, error) {
-	inputCap := cap(input)
+	inputLen := len(input)
 	outputCap := cap(output)
 	if outputCap == 0 {
 		return 0, OutputBufferTooSmallError
 	}
 
 	var inputPtr unsafe.Pointer = nil
-	if inputCap > 0 {
+	if inputLen > 0 {
 		inputPtr = unsafe.Pointer(&input[0])
 	}
 
@@ -398,7 +398,7 @@ func GoGZipCompressBuffer(level CompressionLevel, input []byte, output []byte) (
 
 	var errorCode C.int = C.Z_OK
 
-	compLen := C.gzip_compress_buffer(C.int(level), inputPtr, C.uInt(inputCap), outputPtr, C.uInt(outputCap), &errorCode)
+	compLen := C.gzip_compress_buffer(C.int(level), inputPtr, C.uInt(inputLen), outputPtr, C.uInt(outputCap), &errorCode)
 
 	if errorCode != C.Z_OK {
 		return 0, fmt.Errorf(wrapErrorFormat, BufferCompressError, errorCode)
@@ -410,14 +410,14 @@ func GoGZipCompressBuffer(level CompressionLevel, input []byte, output []byte) (
 // GoUncompressBuffer uncompresses a gzip or standard zlib input buffer writing to a pre allocated output
 // if the output is too small to contain the compressed data, an error is returned
 func GoUncompressBuffer(input []byte, output []byte) (uint64, error) {
-	inputCap := cap(input)
+	inputLen := len(input)
 	outputCap := cap(output)
 	if outputCap == 0 {
 		return 0, OutputBufferTooSmallError
 	}
 
 	var inputPtr unsafe.Pointer = nil
-	if inputCap > 0 {
+	if inputLen > 0 {
 		inputPtr = unsafe.Pointer(&input[0])
 	}
 
@@ -426,7 +426,7 @@ func GoUncompressBuffer(input []byte, output []byte) (uint64, error) {
 
 	var errorCode C.int = C.Z_OK
 
-	uncompLen := C.uncompress_buffer_any(inputPtr, C.uInt(inputCap), outputPtr, C.uInt(outputCap), &errorCode)
+	uncompLen := C.uncompress_buffer_any(inputPtr, C.uInt(inputLen), outputPtr, C.uInt(outputCap), &errorCode)
 
 	if errorCode != C.Z_OK {
 		return 0, fmt.Errorf(wrapErrorFormat, BufferUncompressError, errorCode)
